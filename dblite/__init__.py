@@ -2,6 +2,6 @@
 
 from __future__ import unicode_literals
 
-from .ipscoop import IpScoop
+from .dblite import dbLite, aioDbLite
 
 __version__ = '1.0.0'
