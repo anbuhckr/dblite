@@ -63,3 +63,33 @@ async def amain():
 main()
 asyncio.run(amain())
 ```
+
+Result:
+
+```bash
+# sync
+# create table
+[]
+# add data
+[(1, 'Jhon', 32, 'Developer'), (2, 'Doe', 30, 'Manager'), (3, 'Rio', 29, 'Marketing')]
+# remove Rio
+[(1, 'Jhon', 32, 'Developer'), (2, 'Doe', 30, 'Manager')]
+# update Jhone age
+[(1, 'Jhon', 31, 'CEO'), (2, 'Doe', 30, 'Manager')]
+# show user with id 1
+[(1, 'Jhon', 31, 'CEO')]
+
+
+# async
+# create table
+[]
+# add data
+[(1, 'Jhon', 32, 'Developer'), (2, 'Doe', 30, 'Manager'), (3, 'Rio', 29, 'Marketing')]
+# remove Rio
+[(1, 'Jhon', 32, 'Developer'), (2, 'Doe', 30, 'Manager')]
+# update Jhone age
+[(1, 'Jhon', 31, 'CEO'), (2, 'Doe', 30, 'Manager')]
+# show user with id 1
+[(1, 'Jhon', 31, 'CEO')]
+```
+
