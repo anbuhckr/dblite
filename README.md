@@ -1,2 +1,2 @@
 # dblite
-Python Wrapper For sqlite3 and aiosqlite
+Python wrapper for sqlite3 & aiosql
