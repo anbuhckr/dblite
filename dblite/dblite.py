@@ -13,6 +13,11 @@ class dbLite(object):
         query = f"CREATE TABLE IF NOT EXISTS {table_name} ({data})"
         self.cursor.execute(query)
         self.conn.commit()
+        
+    def drop(self, table_name):
+        query = f"DROP TABLE IF EXISTS {table_name}"
+        self.cursor.execute(query)
+        self.conn.commit()
 
     def add(self, table_name, **kwargs):
         col = ', '.join(list(kwargs.keys()))
@@ -63,6 +68,11 @@ class aioDbLite(AsyncObject):
     async def create(self, table_name, **kwargs):
         data = ', '.join(f"{k} {v}" for k, v in kwargs.items())
         query = f"CREATE TABLE IF NOT EXISTS {table_name} ({data})"
+        await self.cursor.execute(query)
+        await self.conn.commit()
+        
+    async def drop(self, table_name):
+        query = f"DROP TABLE IF EXISTS {table_name}"
         await self.cursor.execute(query)
         await self.conn.commit()
 
