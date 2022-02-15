@@ -7,6 +7,11 @@ class dbLite(object):
     def __init__(self, db_name):
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
+        self.cursor.execute('PRAGMA journal_mode = OFF;')
+        self.cursor.execute('PRAGMA synchronous = 0;')
+        self.cursor.execute('PRAGMA cache_size = 1000000;')
+        self.cursor.execute('PRAGMA locking_mode = EXCLUSIVE;')
+        self.cursor.execute('PRAGMA temp_store = MEMORY;')
 
     def create(self, table_name, **kwargs):
         data = ', '.join(f"{k} {v}" for k, v in kwargs.items())
@@ -64,6 +69,11 @@ class aioDbLite(AsyncObject):
     async def __ainit__(self, db_name):
         self.conn = await aiosqlite.connect(db_name)
         self.cursor = await self.conn.cursor()
+        await self.cursor.execute('PRAGMA journal_mode = OFF;')
+        await self.cursor.execute('PRAGMA synchronous = 0;')
+        await self.cursor.execute('PRAGMA cache_size = 1000000;')
+        await self.cursor.execute('PRAGMA locking_mode = EXCLUSIVE;')
+        await self.cursor.execute('PRAGMA temp_store = MEMORY;')
 
     async def create(self, table_name, **kwargs):
         data = ', '.join(f"{k} {v}" for k, v in kwargs.items())
