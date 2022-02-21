@@ -5,7 +5,7 @@ from async_class import AsyncObject
 
 class dbLite(object):
     def __init__(self, db_name):
-        self.conn = sqlite3.connect(db_name)
+        self.conn = sqlite3.connect(db_name, isolation_level=None, check_same_thread=False)
         self.cursor = self.conn.cursor()
         self.cursor.execute('PRAGMA journal_mode = OFF;')
         self.cursor.execute('PRAGMA synchronous = 0;')
@@ -42,6 +42,11 @@ class dbLite(object):
         query = f"SELECT {data} FROM {table_name} WHERE {condition}"
         data = self.cursor.execute(query, tuple(list(kwargs.values())))
         return data.fetchall()
+    
+    def random(self, table_name, data):
+        query = f"SELECT {data} FROM {table_name} ORDER BY RANDOM() LIMIT 1"
+        data = self.cursor.execute(query)
+        return list(map(' '.join, data.fetchall()))[0]
 
     def update(self, table_name, **kwargs):
         data_set = ', '.join(f"{k} = ?" for k in list(kwargs.keys())[:-1])
@@ -66,7 +71,7 @@ class dbLite(object):
         self.close()
 
 class aioDbLite(AsyncObject):
-    async def __ainit__(self, db_name):
+    async def __ainit__(self, db_name, isolation_level=None, check_same_thread=False):
         self.conn = await aiosqlite.connect(db_name)
         self.cursor = await self.conn.cursor()
         await self.cursor.execute('PRAGMA journal_mode = OFF;')
@@ -104,6 +109,11 @@ class aioDbLite(AsyncObject):
         query = f"SELECT {data} FROM {table_name} WHERE {condition}"
         data = await self.cursor.execute(query, tuple(list(kwargs.values())))
         return await data.fetchall()
+    
+    async def random(self, table_name, data):
+        query = f"SELECT {data} FROM {table_name} ORDER BY RANDOM() LIMIT 1"
+        data = await self.cursor.execute(query)
+        return list(map(' '.join, await data.fetchall()))[0]
 
     async def update(self, table_name, **kwargs):
         data_set = ', '.join(f"{k} = ?" for k in list(kwargs.keys())[:-1])
