@@ -4,4 +4,4 @@ from __future__ import unicode_literals
 
 from .dblite import dbLite, aioDbLite
 
-__version__ = '1.1.0'
+__version__ = '1.2.0'
