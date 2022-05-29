@@ -4,8 +4,8 @@ import sqlite3, aiosqlite
 from async_class import AsyncObject
 
 class dbLite(object):
-    def __init__(self, db_name):
-        self.conn = sqlite3.connect(db_name, isolation_level=None, check_same_thread=False)
+    def __init__(self, db_name, isolation_level=None, check_same_thread=False):
+        self.conn = sqlite3.connect(db_name, isolation_level, check_same_thread)
         self.cursor = self.conn.cursor()
         self.cursor.execute('PRAGMA journal_mode = OFF;')
         self.cursor.execute('PRAGMA synchronous = 0;')
@@ -72,7 +72,7 @@ class dbLite(object):
 
 class aioDbLite(AsyncObject):
     async def __ainit__(self, db_name, isolation_level=None, check_same_thread=False):
-        self.conn = await aiosqlite.connect(db_name)
+        self.conn = await aiosqlite.connect(db_name, isolation_level, check_same_thread)
         self.cursor = await self.conn.cursor()
         await self.cursor.execute('PRAGMA journal_mode = OFF;')
         await self.cursor.execute('PRAGMA synchronous = 0;')
