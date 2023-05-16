@@ -7,8 +7,8 @@ class dbLite(object):
     def __init__(self, db_name):
         self.conn = sqlite3.connect(db_name, isolation_level=None, check_same_thread=False)
         self.cursor = self.conn.cursor()
-        self.cursor.execute('PRAGMA journal_mode = OFF;')
-        self.cursor.execute('PRAGMA synchronous = 0;')
+        self.cursor.execute('PRAGMA journal_mode = WAL;')
+        self.cursor.execute('PRAGMA synchronous = OFF;')
         self.cursor.execute('PRAGMA cache_size = 1000000;')
         self.cursor.execute('PRAGMA locking_mode = EXCLUSIVE;')
         self.cursor.execute('PRAGMA temp_store = MEMORY;')
@@ -29,6 +29,12 @@ class dbLite(object):
         val = ', '.join('?' * len(list(kwargs.values())))
         query = f"INSERT INTO {table_name} ({col}) VALUES ({val})"
         self.cursor.execute(query, tuple(list(kwargs.values())))
+        self.conn.commit()
+
+    def add_list(self, target, source, col, **kwargs):
+        condition = ' AND '.join("{} IN ({})".format(k, ','.join(f'"{x}"' for x in kwargs[k])) for k in kwargs)
+        query = f"INSERT INTO {target} SELECT {col} FROM {source} WHERE {condition}"
+        self.cursor.execute(query)
         self.conn.commit()
 
     def remove(self, table_name, **kwargs):
@@ -55,10 +61,18 @@ class dbLite(object):
         self.cursor.execute(query, tuple(list(kwargs.values())))
         self.conn.commit()
 
+    def update_all(self, target, source, col):
+        query = f"INSERT INTO {target} SELECT {col} FROM {source}"
+        self.cursor.execute(query)
+        self.conn.commit()
+
     def data(self, table_name):
         query = f"SELECT * FROM {table_name}"
         data = self.cursor.execute(query)
         return data.fetchall()
+
+    def count_list(self, target):
+        return self.cursor.execute(f"SELECT COUNT(1) FROM {target}").fetchone()[0]
 
     def close(self):
         self.cursor.close()
@@ -74,8 +88,8 @@ class aioDbLite(AsyncObject):
     async def __ainit__(self, db_name):
         self.conn = await aiosqlite.connect(db_name, isolation_level=None, check_same_thread=False)
         self.cursor = await self.conn.cursor()
-        await self.cursor.execute('PRAGMA journal_mode = OFF;')
-        await self.cursor.execute('PRAGMA synchronous = 0;')
+        await self.cursor.execute('PRAGMA journal_mode = WAL;')
+        await self.cursor.execute('PRAGMA synchronous = OFF;')
         await self.cursor.execute('PRAGMA cache_size = 1000000;')
         await self.cursor.execute('PRAGMA locking_mode = EXCLUSIVE;')
         await self.cursor.execute('PRAGMA temp_store = MEMORY;')
@@ -96,6 +110,12 @@ class aioDbLite(AsyncObject):
         val = ', '.join('?' * len(list(kwargs.values())))
         query = f"INSERT INTO {table_name} ({col}) VALUES ({val})"
         await self.cursor.execute(query, tuple(list(kwargs.values())))
+        await self.conn.commit()
+ 
+    async def add_list(self, target, source, col, **kwargs):
+        condition = ' AND '.join("{} IN ({})".format(k, ','.join(f'"{x}"' for x in kwargs[k])) for k in kwargs)
+        query = f"INSERT INTO {target} SELECT {col} FROM {source} WHERE {condition}"
+        await self.cursor.execute(query)
         await self.conn.commit()
 
     async def remove(self, table_name, **kwargs):
@@ -122,10 +142,18 @@ class aioDbLite(AsyncObject):
         await self.cursor.execute(query, tuple(list(kwargs.values())))
         await self.conn.commit()
 
+    async def update_all(self, target, source, col):
+        query = f"INSERT INTO {target} SELECT {col} FROM {source}"
+        await self.cursor.execute(query)
+        await self.conn.commit()
+
     async def data(self, table_name):
         query = f"SELECT * FROM {table_name}"
         data = await self.cursor.execute(query)
         return await data.fetchall()
+
+    async def count_list(self, target):
+        return await self.cursor.execute(f"SELECT COUNT(1) FROM {target}").fetchone()[0]
 
     async def close(self):
         try:
